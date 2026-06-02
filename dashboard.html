@@ -1,0 +1,149 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Cloud Monitoring Dashboard</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #141e30, #243b55);
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      .dashboard {
+        width: 1000px;
+        padding: 40px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(12px);
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .grid {
+        display: flex;
+        gap: 20px;
+      }
+
+      .card {
+        flex: 1;
+        background: rgba(0, 0, 0, 0.25);
+        padding: 20px;
+        border-radius: 15px;
+      }
+
+      .progress {
+        background: rgba(255, 255, 255, 0.2);
+        height: 18px;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-top: 8px;
+      }
+
+      .fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #00f260, #0575e6);
+        transition: 0.8s;
+      }
+
+      .buttons {
+        margin-top: 30px;
+        text-align: center;
+      }
+
+      button {
+        padding: 12px 35px;
+        border-radius: 30px;
+        border: none;
+        margin: 0 10px;
+        cursor: pointer;
+        font-size: 15px;
+        background: linear-gradient(90deg, #ff512f, #dd2476);
+        color: white;
+      }
+
+      .status {
+        margin-top: 25px;
+        text-align: center;
+        font-size: 18px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="dashboard">
+      <h1>Predictive Cloud Resource Scaling</h1>
+
+      <div class="grid">
+        <div class="card">
+          <h3>CPU Usage</h3>
+          <div class="progress"><div id="cpuBar" class="fill"></div></div>
+          <p id="cpuValue">--%</p>
+        </div>
+
+        <div class="card">
+          <h3>RAM Usage</h3>
+          <div class="progress"><div id="ramBar" class="fill"></div></div>
+          <p id="ramValue">--%</p>
+        </div>
+
+        <div class="card">
+          <h3>Active Users</h3>
+          <p id="usersValue">200</p>
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button onclick="fetchMetrics()">Get Live Metrics</button>
+        <button onclick="predict()">Predict</button>
+      </div>
+
+      <div class="status">
+        <p id="statusText">Monitoring...</p>
+        <p id="predictionText"></p>
+        <p id="timeText"></p>
+      </div>
+    </div>
+
+    <script>
+      async function fetchMetrics() {
+        const response = await fetch("/metrics");
+        const data = await response.json();
+
+        document.getElementById("cpuValue").innerText = data.cpu + "%";
+        document.getElementById("ramValue").innerText = data.ram + "%";
+
+        document.getElementById("cpuBar").style.width = data.cpu + "%";
+        document.getElementById("ramBar").style.width = data.ram + "%";
+
+        document.getElementById("statusText").innerText =
+          "🟢 Monitoring Live Metrics";
+        document.getElementById("predictionText").innerText = "";
+        document.getElementById("timeText").innerText = "";
+      }
+
+      async function predict() {
+        const response = await fetch("/predict");
+        const data = await response.json();
+
+        document.getElementById("predictionText").innerText =
+          "Predicted CPU: " + data.predicted_cpu + "%";
+
+        document.getElementById("statusText").innerText = data.status;
+
+        document.getElementById("timeText").innerText =
+          "Estimated Threshold Time: " + data.reach_time;
+      }
+
+      window.onload = fetchMetrics;
+    </script>
+  </body>
+</html>
